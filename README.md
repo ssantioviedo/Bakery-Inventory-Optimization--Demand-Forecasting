@@ -1,62 +1,184 @@
-# Bakery Inventory Optimization — Demand Forecasting
+# Bakery Inventory Optimization  
+### Demand Forecasting & Inventory Decisions under Uncertainty
 
-## Project Overview
-This project applies a full data science workflow to the inventory optimization problem, from raw transactional data to actionable business recommendations. The pipeline includes:
+**End-to-end data science project** focused on translating raw sales data into actionable inventory decisions for a small bakery, reducing stockouts while controlling waste.
 
-## Installation & Reproducibility
-
-To install all required Python packages and ensure reproducibility, run the following command in your terminal:
-
-```bash
-pip install -r requirements.txt
-```
-
-- **Goal:** Transform sales data into accurate, actionable demand forecasts for smarter inventory decisions.
-- **Key Features:**
-   - Data wrangling and feature engineering to convert transactions into daily material demand
-   - Exploratory data analysis (EDA) to identify key drivers and patterns
-   - Implementation and comparison of multiple time series forecasting models (ETS, SARIMAX, Prophet, Naive)
-   - Robust model evaluation using expanding-window backtesting and multiple error metrics (MAE, WAPE, sMAPE)
-   - Probabilistic Monte Carlo simulation to generate reorder point (ROP) recommendations for any lead time and service level
-   - Clean, reproducible code and clear visualizations
-
-## Workflow
-1. **Setup & Data Loading:**
-   - Load and inspect the bakery sales dataset.
-2. **Data Preprocessing & Aggregation:**
-   - Parse timestamps, aggregate sales to daily counts per SKU, and prepare a continuous time series.
-3. **Exploratory Data Analysis (EDA):**
-   - Identify top-selling products and visualize demand patterns.
-4. **Feature Engineering:**
-   - Map product sales to estimated flour usage (kg/unit) and compute daily flour demand.
-5. **Time Series Construction:**
-   - Aggregate daily flour demand, fill missing days, and prepare data for forecasting models.
-6. **Forecasting & Model Evaluation:**
-   - Train and compare multiple models (ETS, SARIMAX, Prophet, Naive) using expanding-window backtests (MAE, WAPE, sMAPE).
-7. **Inventory Recommendations:**
-   - Use Monte Carlo simulation to generate a probabilistic ROP table for a chosen lead time (e.g., 4 days).
-8. **Conclusion:**
-   - Summarize business impact and actionable recommendations.
-
-## Main Result: Reorder Point (ROP) Table
-
-The notebook produces a clear, visually emphasized ROP table. This table answers the core business question: **How much of a key input should be stocked to meet demand over the lead time?**
-
-- The table provides recommended stock levels for different service levels (mean, 95%, 98%, 99%) over a 4-day lead time.
-- Higher service levels require more safety stock, helping you avoid stockouts at the cost of holding more inventory.
-
-## Example Output
-| Confidence Level | Recommended Stock (kg) | Safety Stock (vs Mean) |
-|------------------|------------------------|------------------------|
-| Mean (50%)       |        39.0            |         0.0            |
-| 95%              |        50.3            |         11.3           |
-| 98%              |        53.4            |         14.4           |
-| 99%              |        55.4            |         16.5           |
-
-
-## Business Impact
-- **Reduces waste** by optimizing stock levels.
-- **Prevents lost sales** by minimizing stockouts.
-- **Provides a reproducible, data-driven pipeline** for inventory management.
+**Tech stack:** Python · Pandas · NumPy · Scikit-Learn · Statsmodels · Prophet · Plotly · Streamlit  
+**Status:** Completed · Reproducible · Business-oriented
 
 ---
+
+## Motivation
+Inventory planning is a recurring challenge across industries:
+
+- Insufficient stock leads to lost sales and operational disruptions  
+- Excess inventory increases holding costs, waste, and inefficiencies  
+
+This project tackles that problem by combining **time series forecasting** with **probabilistic inventory planning**, moving beyond point predictions toward **risk-aware decision making**.
+
+The goal is not just to forecast demand, but to **recommend how much inventory should be held**, given a desired service level.
+
+---
+
+## Problem Statement
+
+Given historical transactional data:
+
+- Forecast short-term demand for a critical inventory item
+- Quantify uncertainty around forecasts
+- Recommend inventory levels aligned with target service levels (e.g. 95%, 99%)
+
+This project uses flour demand as a concrete case study, but the focus is not on a specific product.  
+Instead, it emphasizes **building a reusable decision framework** applicable to retail, manufacturing, logistics, and broader supply chain contexts.
+
+---
+
+## Data & Feature Engineering
+
+- Source: real-world transactional data (`bread basket.csv`)
+- Individual product sales were **mapped to estimated flour consumption (kg)** per SKU
+- Transactions were aggregated into a **daily time series of flour demand**
+
+This step bridges the gap between *sales data* and *operational decisions*, a common challenge in real businesses.
+
+---
+
+## Methodology
+
+The workflow follows a production-oriented data science approach:
+
+### 1. Exploratory Data Analysis
+- Daily demand distribution analysis
+- Strong **weekly seasonality**, with peaks during weekends
+
+### 2. Model Benchmarking
+Multiple forecasting models were evaluated using **expanding window backtesting**:
+
+- Seasonal Naive (baseline)
+- ETS (Error, Trend, Seasonality)
+- SARIMAX
+- Prophet
+
+**Evaluation metrics:** MAE, RMSE, MAPE, WAPE, sMAPE
+
+### 3. Model Selection
+The **ETS model** consistently outperformed alternatives across all metrics and showed stable performance across different time splits.
+
+| Model           | MAE  | RMSE | MAPE (%) | WAPE (%) | sMAPE (%) |
+|-----------------|------|------|----------|----------|-----------|
+| **ETS**         | **2.74** | **3.45** | **22.89** | **18.68** | **19.25** |
+| Prophet         | 3.49 | 4.10 | 26.51 | 22.79 | 25.26 |
+| SARIMAX         | 2.87 | 3.54 | 23.83 | 19.43 | 20.09 |
+| Seasonal Naive  | 3.26 | 4.02 | 25.30 | 22.25 | 22.50 |
+
+
+---
+
+
+
+
+### 4. Probabilistic Forecasting
+Rather than relying on point forecasts:
+
+- Model residuals were bootstrapped
+- **10,000 Monte Carlo simulations** were generated
+- Demand quantiles were computed for different service levels
+
+This enables inventory decisions under uncertainty.
+
+---
+
+## Inventory Policy: Safety Stock & Reorder Point
+
+For a **lead time of 4 days**, the recommended inventory levels are:
+
+| Service Level | Total Stock (kg) | Safety Stock | Interpretation |
+|--------------|------------------|--------------|----------------|
+| 50%          | 39.0             | 0.0          | High risk of stockouts |
+| **95%**      | **50.3**         | **+11.3**    | Balanced and practical |
+| 99%          | 55.4             | +16.5        | Conservative, peak-demand scenarios |
+
+> A buffer of **~11 kg of flour** is enough to satisfy demand in **95% of scenarios**, according to simulated future paths.
+
+---
+
+## Interactive Dashboard
+
+A **Streamlit application** was built to make results accessible to non-technical users.
+
+**Key features:**
+- Historical demand visualization
+- Forecast comparison across models
+- Fan charts with confidence intervals
+- Safety stock calculator based on service level
+
+Link: ---
+
+
+*Demo:*  
+![alt text](demand_dist.png)
+
+---
+
+## Project Structure
+
+```text
+├── .streamlit/          # Streamlit configuration
+├── app.py               # Interactive dashboard
+├── bread basket.csv     # Raw transactional data
+├── notebook.ipynb       # EDA, modeling, validation
+├── requirements.txt     # Dependencies
+└── README.md            # Documentation
+```
+
+---
+
+## How to Run Locally
+
+```bash
+git clone https://github.com/ssantioviedo/Bakery-Inventory-Optimization--Demand-Forecasting
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+---
+
+## Next Steps & Extensions
+
+This project lays the foundation for more advanced inventory optimization strategies, including:
+
+- Economic Order Quantity (**EOQ**) to determine optimal order sizes given holding and ordering costs
+
+- Explicit modeling of holding, shortage, and ordering costs
+
+- Multi-item inventory optimization
+
+- Incorporating perishability and expiration dates to model spoilage risk and improve inventory decisions for time-sensitive materials.
+
+- Dynamic inventory policies adapting to changing demand volatility
+
+- Deployment with automated data refresh (e.g. daily or real-time updates)
+
+These extensions were considered conceptually and represent natural next steps toward a production-grade inventory system.
+
+---
+
+## What This Project Demonstrates
+
+- Translating ambiguous business problems into quantitative models
+
+- Time series forecasting with proper validation
+
+- Probabilistic reasoning and risk-aware decision making
+
+- Designing inventory policies rather than isolated forecasts
+
+- Clear communication of results to technical and non-technical audiences
+
+---
+
+## Author
+
+**Santiago Oviedo** | *Data Scientist*
+
+🔗 **LinkedIn**: https://linkedin.com/in/ssantioviedo
