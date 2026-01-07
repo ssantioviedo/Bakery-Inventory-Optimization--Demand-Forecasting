@@ -112,7 +112,7 @@ A **Streamlit application** was built to make results accessible to non-technica
 - Fan charts with confidence intervals
 - Safety stock calculator based on service level
 
-Link: ---
+Link: https://ssantioviedo-inventory-optimization.streamlit.app/
 
 
 📌 *Demo:*  
