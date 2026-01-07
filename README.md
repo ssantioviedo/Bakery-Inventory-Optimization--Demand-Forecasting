@@ -115,7 +115,7 @@ A **Streamlit application** was built to make results accessible to non-technica
 Link: ---
 
 
-*Demo:*  
+📌 *Demo:*  
 ![alt text](demand_dist.png)
 
 ---
@@ -137,6 +137,7 @@ Link: ---
 
 ```bash
 git clone https://github.com/ssantioviedo/Bakery-Inventory-Optimization--Demand-Forecasting
+cd Bakery-Inventory-Optimization--Demand-Forecasting
 pip install -r requirements.txt
 streamlit run app.py
 ```
